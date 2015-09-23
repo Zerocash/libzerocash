@@ -95,13 +95,13 @@ libzerocash.a: $(OBJS) $(USER_OBJS)
 	#@echo 'Finished copying libzerocash.a'
 	@echo ' '
 
-test_library: %: tests/zerocashTest.o $(OBJS) 
+test_library: %: tests/zerocashTest.o $(OBJS)
 	$(CXX) -o tests/$@ $^ $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lzerocash
-	
-banktest_library: %: bankTest.o $(OBJS) 
+
+banktest_library: %: bankTest.o $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lzerocash
 
-merkletest_library: %: merkleTest.o $(OBJS) 
+merkletest_library: %: merkleTest.o $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lzerocash
 
 .PHONY: clean
