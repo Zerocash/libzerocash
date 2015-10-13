@@ -56,12 +56,14 @@ public:
      */
     uint64_t getMonetaryValue() const;
 
-    IMPLEMENT_SERIALIZE
-    (
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
 		READWRITE(externalCommitment);
         READWRITE(coinValue);
 		READWRITE(internalCommitment);
-    )
+    }
 
 private:
 	std::vector<unsigned char>	coinValue;			// coin value

@@ -101,8 +101,10 @@ public:
 	 */
 	uint64_t getMonetaryValueOut() const;
 
-    IMPLEMENT_SERIALIZE
-    (
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
 		READWRITE(version);
         READWRITE(publicValue);
         READWRITE(serialNumber_1);
@@ -114,7 +116,7 @@ public:
         READWRITE(ciphertext_1);
         READWRITE(ciphertext_2);
 		READWRITE(zkSNARK);
-    )
+    }
 
 
 private:
