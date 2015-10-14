@@ -24,6 +24,8 @@
 #include "libzerocash/PourTransaction.h"
 #include "libzerocash/utils/util.h"
 
+#include "libzerocash/streams.h"
+
 using namespace std;
 using namespace libsnark;
 
