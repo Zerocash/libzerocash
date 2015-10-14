@@ -590,6 +590,7 @@ int main(int argc, char **argv)
 
     const size_t tree_depth = 4;
 
+    start_profiling();
 	bool merkleSimpleResult = MerkleTreeSimpleTest();
     bool addressResult = AddressTest();
     bool coinResult = CoinTest();
