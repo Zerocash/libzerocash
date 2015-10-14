@@ -26,13 +26,13 @@ before_install:
   - wget http://www.cryptopp.com/cryptopp562.zip
   - echo "5cbfd2fcb4a6b3aab35902e2e0f3b59d9171fee12b3fc2b363e1801dfec53574  cryptopp562.zip" | sha256sum -c
   - unzip cryptopp562.zip
-  - make static CXXFLAGS='-DNDEBUG -g -O2 -fPIC'
+  - make -j8 static CXXFLAGS='-DNDEBUG -g -O2 -fPIC'
   - sudo make install
   - cd ..
 
 script:
   - LDFLAGS="-lrt" LIBSNARK_FLAGS="NO_PROCPS=1 NO_GTEST=1 NO_DOCS=1 STATIC=1" ./get-libsnark
-  - NO_PROCPS=1 MINDEPS=1 LINK_RT=1 make
+  - NO_PROCPS=1 MINDEPS=1 LINK_RT=1 make -j8
   - ./zerocash_pour_ppzksnark/tests/test_zerocash_pour_ppzksnark
   - ./tests/merkleTest
   - ./tests/zerocashTest
