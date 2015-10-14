@@ -8,7 +8,7 @@ LIBZEROCASH=libzerocash
 UTILS=$(LIBZEROCASH)/utils
 TESTUTILS=tests
 LDLIBS += -L $(DEPINST)/lib -Wl,-rpath $(DEPINST)/lib -L . -lsnark -lzm -lgmpxx -lgmp
-LDLIBS += -lboost_system -lcrypto -lcryptopp
+LDLIBS += -lboost_system -lcrypto -lcryptopp -lz -ldl
 CXXFLAGS += -I $(DEPINST)/include -I $(DEPINST)/include/libsnark -I . -DUSE_ASM -DCURVE_ALT_BN128
 
 LIBPATH = /usr/local/lib
@@ -56,7 +56,13 @@ ifeq ($(PROFILE_CURVE),1)
 endif
 
 ifeq ($(MULTICORE),1)
-	CXXFLAGS += -static -DMULTICORE
+	# When running ./get-libsnark to prepare for this build, use:
+	# $ LIBSNARK_FLAGS='MULTICORE=1 STATIC=1' ./get-libsnark.
+	# If you're missing some static libraries, it may help to also add
+	# $ NO_PROCPS=1  ...  ./get-libsnark
+	# and pass MINDEPS=1 to this makefile
+	# and run ./get-cryptopp to build the static cryptopp library.
+	CXXFLAGS += -static -fopenmp -DMULTICORE
 endif
 
 all: $(EXECUTABLES) libzerocash.a
