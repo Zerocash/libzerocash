@@ -4,6 +4,9 @@ env:
   global:
     - TRAVIS_BOOST_OPTS="threading=multi link=static -sNO_BZIP2=1 -sNO_ZLIB=1 address-model=64"
     - TRAVIS_BOOST_LIBRARIES="chrono,filesystem,program_options,system,thread,test"
+    - TRAVIS_SNARK_FLAGS="-j4 CURVE=ALT_BN128 NO_PROCPS=1 NO_GTEST=1 NO_DOCS=1 STATIC=1"
+    - TRAVIS_LIBZEROCASH_CXXFLAGS="-DCURVE_ALT_BN128 -DBOOST_SPIRIT_THREADSAFE -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 -std=c++11 -pipe -O2 -O0 -g -Wstack-protector -fstack-protector-all -fPIE -fvisibility=hidden -fPIC"
+    - TRAVIS_LIBZEROCASH_FLAGS="-j4 NO_PROCPS=1 MINDEPS=1 LINK_RT=1"
 
 before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y # For g++-4.9
@@ -31,8 +34,8 @@ before_install:
   - cd ..
 
 script:
-  - LDFLAGS="-lrt" LIBSNARK_FLAGS="NO_PROCPS=1 NO_GTEST=1 NO_DOCS=1 STATIC=1" ./get-libsnark
-  - NO_PROCPS=1 MINDEPS=1 LINK_RT=1 make -j8
+  - LDFLAGS="-lrt" LIBSNARK_FLAGS="$TRAVIS_SNARK_FLAGS" ./get-libsnark
+  - CXXFLAGS="$TRAVIS_LIBZEROCASH_CXXFLAGS" make $TRAVIS_LIBZEROCASH_FLAGS
   - ./zerocash_pour_ppzksnark/tests/test_zerocash_pour_ppzksnark
   - ./tests/merkleTest
   - ./tests/zerocashTest
