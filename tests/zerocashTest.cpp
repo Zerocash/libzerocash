@@ -156,7 +156,11 @@ bool PourTxTest(const size_t tree_depth) {
 
     cout << "Creating Params...\n" << endl;
 
+    libzerocash::timer_start("Param Generation");
     libzerocash::ZerocashParams p(tree_depth);
+    p.getProvingKey(1); // Strangely enough, this is how we trigger parameter generation.
+    libzerocash::timer_stop("Param Generation");
+    print_mem("after param generation");
 
     cout << "Successfully created Params.\n" << endl;
 
@@ -236,6 +240,7 @@ bool PourTxTest(const size_t tree_depth) {
     libzerocash::timer_start("Pour Transaction");
     libzerocash::PourTransaction pourtx(1, p, rt, coins.at(1), coins.at(3), addrs.at(1), addrs.at(3), 1, 3, witness_1, witness_2, pubAddress3, pubAddress4, 0, as, c_1_new, c_2_new);
     libzerocash::timer_stop("Pour Transaction");
+    print_mem("after pour transaction");
 
     cout << "Successfully created a pour transaction.\n" << endl;
 
@@ -376,9 +381,10 @@ bool MerkleTreeSimpleTest() {
 bool SimpleTxTest(const size_t tree_depth) {
     cout << "\nSIMPLE TRANSACTION TEST\n" << endl;
 
-    cout << "Creating Params...\n" << endl;
+    libzerocash::timer_start("Param Generation");
     libzerocash::ZerocashParams p(tree_depth);
-    cout << "Successfully created Params.\n" << endl;
+    p.getProvingKey(1); // Strangely enough, this is how we trigger parameter generation.
+    libzerocash::timer_stop("Param Generation");
 
     vector<libzerocash::Coin> coins(5);
     vector<libzerocash::Address> addrs(5);
