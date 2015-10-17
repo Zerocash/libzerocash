@@ -1,4 +1,5 @@
 #!/bin/bash
+# To pass parameters to the cryptopp makefile, use `CRYPTOPP_FLAGS=... ./get-cryptopp`
 set -e
 
 DEPSRC=./depsrc
@@ -20,7 +21,7 @@ if [ ! -f hmac.cpp ]; then
     unzip cryptopp562.zip
 fi
 
-make -j static dynamic CXXFLAGS='-DNDEBUG -g -O2 -fPIC'
+make static dynamic CXXFLAGS='-DNDEBUG -g -O2 -fPIC' $CRYPTOPP_FLAGS
 touch $DUMMIES # kludge: cryptopp's "make install" breaks if there are no such files to install
-make install PREFIX=$DEPINST/
+make install PREFIX=$DEPINST/ $CRYPTOPP_FLAGS
 rm -f $DUMMIES
