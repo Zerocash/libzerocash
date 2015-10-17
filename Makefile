@@ -1,4 +1,5 @@
-CXXFLAGS += -g -Wall -Wextra -Werror -Wfatal-errors -Wno-unused-parameter -march=native -mtune=native -std=c++11 -fPIC -Wno-unused-variable
+OPTFLAGS = -march=native -mtune=native -O2
+CXXFLAGS += -g -Wall -Wextra -Werror -Wfatal-errors -Wno-unused-parameter -std=c++11 -fPIC -Wno-unused-variable
 LDFLAGS += -flto
 
 DEPSRC=depsrc
