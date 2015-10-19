@@ -2,14 +2,15 @@
 # To pass options options to libsnark Makefile, put them in env var LIBSNARK_FLAGS.
 # To clone libsnark from an alternate location, set env var LIBSNARK_SRC. For example:
 #  LIBSNARK_SRC="$HOME/libsnark.git --branch master" ./get-libsnark
-# To use curve ALT_BN128 instead of BN128 (which is x64-only), use:
-#  CURVE=ALT_BN128 ./get-libsnark
+# To use curve BN128 instead of BN128 (which is x64-only), use:
+#  CURVE=BN128 ./get-libsnark
+# and pass CURVE=BN128 as an argument to make.
 
 set -e
 
 LIBSNARK_SRC=${LIBSNARK_SRC:-https://github.com/scipr-lab/libsnark}
 
-CURVE=${CURVE:-BN128}
+CURVE=${CURVE:-ALT_BN128}
 
 LIBSNARK_FLAGS="$LIBSNARK_FLAGS NO_SUPERCOP=1 NO_GTEST=1 NO_DOCS=1 CURVE=$CURVE"
 if [[ `uname -s` == "Darwin" ]]; then

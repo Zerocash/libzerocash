@@ -2,6 +2,11 @@ OPTFLAGS = -march=native -mtune=native -O2
 CXXFLAGS += -g -Wall -Wextra -Werror -Wfatal-errors -Wno-unused-parameter -std=c++11 -fPIC -Wno-unused-variable
 LDFLAGS += -flto
 
+ifeq ($(CURVE),)
+	CURVE = ALT_BN128
+endif
+
+
 DEPSRC=depsrc
 DEPINST=depinst
 
@@ -10,7 +15,7 @@ UTILS=$(LIBZEROCASH)/utils
 TESTUTILS=tests
 LDLIBS += -L $(DEPINST)/lib -Wl,-rpath $(DEPINST)/lib -L . -lsnark -lgmpxx -lgmp
 LDLIBS += -lboost_system -lcrypto -lcryptopp -lz -ldl
-CXXFLAGS += -I $(DEPINST)/include -I $(DEPINST)/include/libsnark -I . -DUSE_ASM -DCURVE_ALT_BN128
+CXXFLAGS += -I $(DEPINST)/include -I $(DEPINST)/include/libsnark -I . -DUSE_ASM -DCURVE_$(CURVE)
 
 LIBPATH = /usr/local/lib
 
