@@ -116,15 +116,26 @@ zerocash_pour_keypair<ppzksnark_ppT> zerocash_pour_ppzksnark_generator(const siz
     typedef Fr<ppzksnark_ppT> FieldT;
     enter_block("Call to zerocash_pour_ppzksnark_generator");
 
-    protoboard<FieldT> pb;
-    zerocash_pour_gadget<FieldT> g(pb, num_old_coins, num_new_coins, tree_depth, "zerocash_pour");
-    g.generate_r1cs_constraints();
-    const r1cs_constraint_system<FieldT> constraint_system = pb.get_constraint_system();
+    r1cs_constraint_system<FieldT> constraint_system;
+    {
+        enter_block("Generating Pour constraint system");
+        protoboard<FieldT> pb;
+        print_indent(); print_mem("before constructing the Pour gadget");
+        zerocash_pour_gadget<FieldT> g(pb, num_old_coins, num_new_coins, tree_depth, "zerocash_pour");
+        print_indent(); print_mem("after constructing the Pour gadget");
+        g.generate_r1cs_constraints();
+        print_indent(); print_mem("after generating the Pour constraints");
+        constraint_system = pb.get_constraint_system(); // and now we can forget the pb and gadget
+        print_indent(); print_mem("after converting to R1CS");
+        leave_block("Generating Pour constraint system");
+    }
+
     r1cs_ppzksnark_keypair<ppzksnark_ppT> ppzksnark_keypair = r1cs_ppzksnark_generator<ppzksnark_ppT>(constraint_system);
-    leave_block("Call to zerocash_pour_ppzksnark_generator");
 
     zerocash_pour_proving_key<ppzksnark_ppT> zerocash_pour_pk(num_old_coins, num_new_coins, tree_depth, std::move(ppzksnark_keypair.pk));
     zerocash_pour_verification_key<ppzksnark_ppT> zerocash_pour_vk(num_old_coins, num_new_coins, std::move(ppzksnark_keypair.vk));
+
+    leave_block("Call to zerocash_pour_ppzksnark_generator");
     return zerocash_pour_keypair<ppzksnark_ppT>(std::move(zerocash_pour_pk), std::move(zerocash_pour_vk));
 }
 
