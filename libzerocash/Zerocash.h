@@ -67,5 +67,6 @@ namespace libzerocash {
 };
 
 #include "libzerocash/utils/util.h"
+#include "streams.h"
 
 #endif /* ZEROCASH_H_ */
