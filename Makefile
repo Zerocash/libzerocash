@@ -37,6 +37,8 @@ EXECUTABLES= \
 
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 
+DOCS=README.html
+
 ifeq ($(MINDEPS),1)
 	CXXFLAGS += -DMINDEPS
 else
@@ -117,7 +119,14 @@ banktest_library: %: bankTest.o $(OBJS)
 merkletest_library: %: merkleTest.o $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lzerocash
 
-.PHONY: clean
+$(DOCS): %.html: %.md
+	markdown_py -f $@ $^ -x toc -x extra --noisy
+#	TODO: Would be nice to enable "-x smartypants" but Ubuntu 12.04 doesn't support that.
+#	TODO: switch to redcarpet, to produce same output as GitHub's processing of README.md. But what about TOC?
+
+doc: $(DOCS)
+
+.PHONY: clean doc all
 
 clean:
 	$(RM) \
