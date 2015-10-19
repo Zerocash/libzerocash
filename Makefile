@@ -130,7 +130,7 @@ banktest_library: %: bankTest.o $(OBJS)
 merkletest_library: %: merkleTest.o $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lzerocash
 
-.PHONY: clean
+.PHONY: clean install
 
 clean:
 	$(RM) \
@@ -140,3 +140,17 @@ clean:
 		${patsubst %.cpp,%.d,${SRCS}} \
 		libzerocash.a \
 		tests/test_library
+
+
+HEADERS_SRC=$(shell find . -name '*.hpp' -o -name '*.tcc' -o -name '*.h')
+HEADERS_DEST=$(patsubst %,$(PREFIX)/include/libzerocash/%,$(HEADERS_SRC))
+
+$(HEADERS_DEST): $(PREFIX)/include/libzerocash/%: %
+	mkdir -p $(shell dirname $@)
+	cp $< $@
+
+install: all $(HEADERS_DEST)
+	mkdir -p $(PREFIX)/lib
+	install -m 0755 libzerocash.a $(PREFIX)/lib/
+	mkdir -p $(PREFIX)/bin
+	install -m 0755 -t $(PREFIX)/bin/ $(EXECUTABLES)
