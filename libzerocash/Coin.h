@@ -41,6 +41,8 @@ public:
 		 const std::vector<unsigned char>& rho,
          const std::vector<unsigned char>& r);
 
+   	Coin(const std::string bucket, Address& addr);
+
 	const PublicAddress& getPublicAddress() const;
 
 	const CoinCommitment& getCoinCommitment() const;
@@ -60,6 +62,8 @@ public:
 		READWRITE(coinValue);
 	}
 
+	uint64_t getValue() const;
+
 private:
 	PublicAddress addr_pk;
     CoinCommitment cm;
@@ -74,8 +78,6 @@ private:
 
     const std::vector<unsigned char>& getR() const;
     void computeCommitments(std::vector<unsigned char>& a_pk);
-
-	uint64_t getValue() const;
 };
 
 } /* namespace libzerocash */

@@ -12,12 +12,58 @@
 #ifndef ADDRESS_H_
 #define ADDRESS_H_
 
+#include <cryptopp/osrng.h>
+using CryptoPP::AutoSeededRandomPool;
+
+#include <cryptopp/eccrypto.h>
+using CryptoPP::ECP;
+using CryptoPP::ECIES;
+
+#include <cryptopp/oids.h>
+namespace ASN1 = CryptoPP::ASN1;
+
+#include <cryptopp/filters.h>
+using CryptoPP::StringSink;
+using CryptoPP::StringStore;
+
 #include <vector>
 #include <string>
 
 #include "serialize.h"
 
 namespace libzerocash {
+
+/***************************** Private address ********************************/
+
+class PrivateAddress {
+
+    friend class Address;
+    friend class Coin;
+    friend class PourTransaction;
+
+public:
+    PrivateAddress();
+
+	bool operator==(const PrivateAddress& rhs) const;
+	bool operator!=(const PrivateAddress& rhs) const;
+
+	ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+	    READWRITE(a_sk);
+	    READWRITE(sk_enc);
+    }
+
+    void createPrivateAddress(const std::vector<unsigned char> a_sk, const std::string sk_enc);
+
+private:
+    std::vector<unsigned char> a_sk;
+    std::string sk_enc;
+
+    const std::vector<unsigned char>& getAddressSecret() const;
+    const std::string getEncryptionSecretKey() const;
+};
 
 /***************************** Public address ********************************/
 
@@ -58,11 +104,14 @@ private:
 class Address {
 
 friend class PourTransaction;
+friend class Coin;
 
 public:
 	Address();
+	Address(PrivateAddress&);
 
 	const PublicAddress& getPublicAddress() const;
+	const PrivateAddress& getPrivateAddress() const;
 
 	bool operator==(const Address& rhs) const;
 	bool operator!=(const Address& rhs) const;
@@ -72,17 +121,14 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
 	    READWRITE(addr_pk);
-	    READWRITE(a_sk);
-        READWRITE(sk_enc);
+        READWRITE(addr_sk);
     }
 
 private:
 	PublicAddress addr_pk;
-	std::vector<unsigned char> a_sk;
-    std::string sk_enc;
+    PrivateAddress addr_sk;
 
     const std::vector<unsigned char>& getAddressSecret() const;
-
 	const std::string getEncryptionSecretKey() const;
 };
 

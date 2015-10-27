@@ -245,24 +245,37 @@ PourTransaction::PourTransaction(uint16_t version_num,
     ECIES<ECP>::PublicKey publicKey_1;
     publicKey_1.Load(StringStore(addr_1_new.getEncryptionPublicKey()).Ref());
     ECIES<ECP>::Encryptor encryptor_1(publicKey_1);
-    char ciphertext_1_internals[v_size + zc_r_size + rho_size];
-    snprintf(ciphertext_1_internals, sizeof ciphertext_1_internals, "%s%s%s", val_new_1_bytes, rand_new_1_bytes, nonce_new_1_bytes);
 
-    byte gEncryptBuf[encryptor_1.CiphertextLength(sizeof(ciphertext_1_internals) + 1)];
-    encryptor_1.Encrypt(prng_1, (const byte *)ciphertext_1_internals, sizeof ciphertext_1_internals, gEncryptBuf);
+    std::vector<unsigned char> ciphertext_1_internals;
+    ciphertext_1_internals.insert(ciphertext_1_internals.end(), c_1_new.coinValue.begin(), c_1_new.coinValue.end());
+    ciphertext_1_internals.insert(ciphertext_1_internals.end(), c_1_new.r.begin(), c_1_new.r.end());
+    ciphertext_1_internals.insert(ciphertext_1_internals.end(), c_1_new.rho.begin(), c_1_new.rho.end());
+
+    assert(ciphertext_1_internals.size() == (v_size + zc_r_size + rho_size));
+
+    byte gEncryptBuf[encryptor_1.CiphertextLength(v_size + zc_r_size + rho_size)];
+
+    encryptor_1.Encrypt(prng_1, &ciphertext_1_internals[0], v_size + zc_r_size + rho_size, gEncryptBuf);
 
     std::string C_1_string(gEncryptBuf, gEncryptBuf + sizeof gEncryptBuf / sizeof gEncryptBuf[0]);
     this->ciphertext_1 = C_1_string;
+
+    ///////// DUN DUN DUN
 
     ECIES<ECP>::PublicKey publicKey_2;
     publicKey_2.Load(StringStore(addr_2_new.getEncryptionPublicKey()).Ref());
     ECIES<ECP>::Encryptor encryptor_2(publicKey_2);
 
-    char ciphertext_2_internals[v_size + zc_r_size + rho_size];
-    snprintf(ciphertext_2_internals, sizeof ciphertext_2_internals, "%s%s%s", val_new_2_bytes, rand_new_2_bytes, nonce_new_2_bytes);
+    std::vector<unsigned char> ciphertext_2_internals;
+    ciphertext_2_internals.insert(ciphertext_2_internals.end(), c_2_new.coinValue.begin(), c_2_new.coinValue.end());
+    ciphertext_2_internals.insert(ciphertext_2_internals.end(), c_2_new.r.begin(), c_2_new.r.end());
+    ciphertext_2_internals.insert(ciphertext_2_internals.end(), c_2_new.rho.begin(), c_2_new.rho.end());
 
-    byte gEncryptBuf_2[encryptor_2.CiphertextLength(sizeof(ciphertext_2_internals) + 1)];
-    encryptor_2.Encrypt(prng_2, (const byte *)ciphertext_2_internals, sizeof ciphertext_2_internals, gEncryptBuf_2);
+    assert(ciphertext_2_internals.size() == (v_size + zc_r_size + rho_size));
+
+    byte gEncryptBuf_2[encryptor_2.CiphertextLength(v_size + zc_r_size + rho_size)];
+
+    encryptor_2.Encrypt(prng_1, &ciphertext_2_internals[0], v_size + zc_r_size + rho_size, gEncryptBuf_2);
 
     std::string C_2_string(gEncryptBuf_2, gEncryptBuf_2 + sizeof gEncryptBuf_2 / sizeof gEncryptBuf_2[0]);
     this->ciphertext_2 = C_2_string;
@@ -342,6 +355,14 @@ const std::vector<unsigned char>& PourTransaction::getSpentSerial1() const{
 
 const std::vector<unsigned char>& PourTransaction::getSpentSerial2() const{
 	return this->serialNumber_2;
+}
+
+const std::string& PourTransaction::getCiphertext1() const {
+    return this->ciphertext_1;
+}
+
+const std::string& PourTransaction::getCiphertext2() const {
+    return this->ciphertext_2;
 }
 
 /**

@@ -22,6 +22,48 @@ Coin::Coin(): addr_pk(), cm(), rho(rho_size), r(zc_r_size), coinValue(v_size) {
 
 }
 
+Coin::Coin(const std::string bucket, Address& addr): addr_pk(), cm(), rho(rho_size), r(zc_r_size), coinValue(v_size) {
+    // Retreive and decode the private key
+    ECIES<ECP>::PrivateKey decodedPrivateKey;
+    decodedPrivateKey.Load(StringStore(addr.getEncryptionSecretKey()).Ref());
+
+    // Create the decryption session
+    AutoSeededRandomPool prng;
+    ECIES<ECP>::Decryptor decrypt(decodedPrivateKey);
+
+    // Convert the input string into a vector of bytes
+    std::vector<byte> bucket_bytes(bucket.begin(), bucket.end());
+
+    // Construct a temporary object to store the plaintext, large enough
+    // to store the plaintext if it were extended beyond the real size.
+    std::vector<unsigned char> plaintext;
+    // Size as needed, filling with zeros.
+    plaintext.resize(decrypt.MaxPlaintextLength(decrypt.CiphertextLength(v_size + zc_r_size + rho_size)), 0);
+
+    // Perform the decryption
+    decrypt.Decrypt(prng,
+                    &bucket_bytes[0],
+                    decrypt.CiphertextLength(v_size + zc_r_size + rho_size),
+                    &plaintext[0]);
+
+    // Grab the byte vectors
+    std::vector<unsigned char> value_v(plaintext.begin(),
+                                       plaintext.begin() + v_size);
+    std::vector<unsigned char>     r_v(plaintext.begin() + v_size,
+                                       plaintext.begin() + v_size + zc_r_size);
+    std::vector<unsigned char>   rho_v(plaintext.begin() + v_size + zc_r_size,
+                                       plaintext.begin() + v_size + zc_r_size + rho_size);
+
+    this->coinValue = value_v;
+    this->r = r_v;
+    this->rho = rho_v;
+    this->addr_pk = addr.getPublicAddress();
+
+    std::vector<unsigned char> a_pk = addr.getPublicAddress().getPublicAddressSecret();
+
+    this->computeCommitments(a_pk);
+}
+
 Coin::Coin(const PublicAddress& addr, uint64_t value): addr_pk(addr), cm(), rho(rho_size), r(zc_r_size), k(k_size), coinValue(v_size)
 {
     convertIntToBytesVector(value, this->coinValue);
