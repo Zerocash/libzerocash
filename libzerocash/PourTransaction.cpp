@@ -260,8 +260,6 @@ PourTransaction::PourTransaction(uint16_t version_num,
     std::string C_1_string(gEncryptBuf, gEncryptBuf + sizeof gEncryptBuf / sizeof gEncryptBuf[0]);
     this->ciphertext_1 = C_1_string;
 
-    ///////// DUN DUN DUN
-
     ECIES<ECP>::PublicKey publicKey_2;
     publicKey_2.Load(StringStore(addr_2_new.getEncryptionPublicKey()).Ref());
     ECIES<ECP>::Encryptor encryptor_2(publicKey_2);
