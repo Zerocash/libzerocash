@@ -11,6 +11,20 @@
  * @copyright  MIT license (see LICENSE file)
  *****************************************************************************/
 
+#include <cryptopp/osrng.h>
+using CryptoPP::AutoSeededRandomPool;
+
+#include <cryptopp/eccrypto.h>
+using CryptoPP::ECP;
+using CryptoPP::ECIES;
+
+#include <cryptopp/oids.h>
+namespace ASN1 = CryptoPP::ASN1;
+
+#include <cryptopp/filters.h>
+using CryptoPP::StringSink;
+using CryptoPP::StringStore;
+
 #include "Zerocash.h"
 #include "Address.h"
 
