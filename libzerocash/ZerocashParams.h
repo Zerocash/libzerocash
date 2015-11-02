@@ -24,29 +24,20 @@ class ZerocashParams {
 public:
     typedef default_r1cs_ppzksnark_pp zerocash_pp;
 
-	ZerocashParams(const unsigned int tree_depth);
-	ZerocashParams(zerocash_pour_proving_key<zerocash_pp>* p_pk_1,
-                   zerocash_pour_verification_key<zerocash_pp>* p_vk_1);
+    ZerocashParams(
+        const unsigned int tree_depth,
+        zerocash_pour_keypair<ZerocashParams::zerocash_pp> *keypair
+    );
 
-    ZerocashParams(const unsigned int tree_depth,
-                   std::string pathToProvingParams,
-                   std::string pathToVerificationParams);
-
-    const zerocash_pour_proving_key<zerocash_pp>& getProvingKey(const int version);
-
-    const zerocash_pour_verification_key<zerocash_pp>& getVerificationKey(const int version);
+    const zerocash_pour_proving_key<zerocash_pp>& getProvingKey();
+    const zerocash_pour_verification_key<zerocash_pp>& getVerificationKey();
     ~ZerocashParams();
 
+    static const size_t numPourInputs = 2;
+    static const size_t numPourOutputs = 2;
 private:
-    void initV1Params();
-    zerocash_pour_keypair<zerocash_pp>* kp_v1;
-    zerocash_pour_proving_key<zerocash_pp>* params_pk_v1;
-    zerocash_pour_verification_key<zerocash_pp>* params_vk_v1;
     int treeDepth;
-
-    const size_t numPourInputs = 2;
-    const size_t numPourOutputs = 2;
-
+    zerocash_pour_keypair<zerocash_pp>* kp_v1;
 };
 
 } /* namespace libzerocash */

@@ -196,7 +196,7 @@ PourTransaction::PourTransaction(uint16_t version_num,
     convertVectorToBytesVector(MAC_2_bv, this->MAC_2);
 
     if(this->version > 0){
-        zerocash_pour_proof<ZerocashParams::zerocash_pp> proofObj = zerocash_pour_ppzksnark_prover<ZerocashParams::zerocash_pp>(params.getProvingKey(this->version),
+        zerocash_pour_proof<ZerocashParams::zerocash_pp> proofObj = zerocash_pour_ppzksnark_prover<ZerocashParams::zerocash_pp>(params.getProvingKey(),
             { patMAC_1, patMAC_2 },
             { patMerkleIdx_1, patMerkleIdx_2 },
             root_bv,
@@ -335,7 +335,7 @@ bool PourTransaction::verify(ZerocashParams& params,
     std::vector<bool> h_S_bv(h_size * 8);
     convertBytesToVector(h_S_bytes, h_S_bv);
 
-    bool snark_result = zerocash_pour_ppzksnark_verifier<ZerocashParams::zerocash_pp>(params.getVerificationKey(this->version),
+    bool snark_result = zerocash_pour_ppzksnark_verifier<ZerocashParams::zerocash_pp>(params.getVerificationKey(),
                                                                                       root_bv,
                                                                                       { sn_old_1_bv, sn_old_2_bv },
                                                                                       { cm_new_1_bv, cm_new_2_bv },
