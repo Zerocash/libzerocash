@@ -73,6 +73,41 @@ int AddressTest() {
     return result;
 }
 
+int SaveAndLoadKeysFromFiles(int tree_depth) {
+    cout << "\nSaveAndLoadKeysFromFiles TEST\n" << endl;
+
+    cout << "Creating Params...\n" << endl;
+
+    libzerocash::timer_start("Param Generation");
+    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    libzerocash::ZerocashParams p(
+        tree_depth,
+        &thing
+    );
+    libzerocash::timer_stop("Param Generation");
+    print_mem("after param generation");
+
+    cout << "Successfully created Params.\n" << endl;
+
+    std::string vk_path = "./zerocashTest-verification-key";
+    std::string pk_path = "./zerocashTest-proving-key";
+
+    libzerocash::ZerocashParams::SaveProvingKeyToFile(
+        &p.getProvingKey(),
+        pk_path
+    );
+
+    libzerocash::ZerocashParams::SaveVerificationKeyToFile(
+        &p.getVerificationKey(),
+        vk_path
+    );
+
+    auto pk_loaded = libzerocash::ZerocashParams::LoadProvingKeyFromFile(pk_path, tree_depth);
+    auto vk_loaded = libzerocash::ZerocashParams::LoadVerificationKeyFromFile(vk_path, tree_depth);
+
+    return (p.getProvingKey() == pk_loaded) && (p.getVerificationKey() == vk_loaded);
+}
+
 int CoinTest() {
     cout << "\nCOIN TEST\n" << endl;
 
@@ -158,14 +193,11 @@ bool PourTxTest(const size_t tree_depth) {
     cout << "Creating Params...\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    libzerocash::ZerocashParams::zerocash_pp::init_public_params();
-    libzerocash::zerocash_pour_keypair<libzerocash::ZerocashParams::zerocash_pp> kp_v1 =
-        libzerocash::zerocash_pour_ppzksnark_generator<libzerocash::ZerocashParams::zerocash_pp>(
-            libzerocash::ZerocashParams::numPourInputs,
-            libzerocash::ZerocashParams::numPourOutputs,
-            tree_depth
-        );
-    libzerocash::ZerocashParams p(tree_depth, &kp_v1);
+    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    libzerocash::ZerocashParams p(
+        tree_depth,
+        &thing
+    );
     libzerocash::timer_stop("Param Generation");
     print_mem("after param generation");
 
@@ -389,14 +421,11 @@ bool SimpleTxTest(const size_t tree_depth) {
     cout << "\nSIMPLE TRANSACTION TEST\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    libzerocash::ZerocashParams::zerocash_pp::init_public_params();
-    libzerocash::zerocash_pour_keypair<libzerocash::ZerocashParams::zerocash_pp> kp_v1 =
-        libzerocash::zerocash_pour_ppzksnark_generator<libzerocash::ZerocashParams::zerocash_pp>(
-            libzerocash::ZerocashParams::numPourInputs,
-            libzerocash::ZerocashParams::numPourOutputs,
-            tree_depth
-        );
-    libzerocash::ZerocashParams p(tree_depth, &kp_v1);
+    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    libzerocash::ZerocashParams p(
+        tree_depth,
+        &thing
+    );
     libzerocash::timer_stop("Param Generation");
 
     vector<libzerocash::Coin> coins(5);
@@ -511,6 +540,7 @@ int main(int argc, char **argv)
     bool addressResult = AddressTest();
     bool coinResult = CoinTest();
     bool mintTxResult = MintTxTest();
+    bool saveAndLoadKeysFromFiles = SaveAndLoadKeysFromFiles(tree_depth);
 
     bool pourTxResult = PourTxTest(tree_depth);
     bool simpleTxResult = SimpleTxTest(tree_depth);
@@ -522,4 +552,9 @@ int main(int argc, char **argv)
     std::cout << "\nMintTxTest result => " << mintTxResult << std::endl;
     std::cout << "\nPourTxTest result => " << pourTxResult << std::endl;
     std::cout << "\nSimpleTxTest result => " << simpleTxResult << std::endl;
+    std::cout << "\nSaveAndLoadKeysFromFiles result => " << saveAndLoadKeysFromFiles << std::endl;
+
+    return merkleSimpleResult && addressResult &&
+        coinResult && mintTxResult && saveAndLoadKeysFromFiles
+        && pourTxResult && simpleTxResult;
 }

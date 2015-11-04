@@ -29,15 +29,29 @@ public:
         zerocash_pour_keypair<ZerocashParams::zerocash_pp> *keypair
     );
 
+    ZerocashParams(
+        const unsigned int tree_depth,
+        zerocash_pour_proving_key<ZerocashParams::zerocash_pp>* p_pk_1,
+        zerocash_pour_verification_key<ZerocashParams::zerocash_pp>* p_vk_1
+    );
+
     const zerocash_pour_proving_key<zerocash_pp>& getProvingKey();
     const zerocash_pour_verification_key<zerocash_pp>& getVerificationKey();
     ~ZerocashParams();
 
     static const size_t numPourInputs = 2;
     static const size_t numPourOutputs = 2;
+
+    static zerocash_pour_keypair<ZerocashParams::zerocash_pp> GenerateNewKeyPair(const unsigned int tree_depth);
+
+    static void SaveProvingKeyToFile(const zerocash_pour_proving_key<ZerocashParams::zerocash_pp>* p_pk_1, std::string path);
+    static void SaveVerificationKeyToFile(const zerocash_pour_verification_key<ZerocashParams::zerocash_pp>* p_vk_1, std::string path);
+    static zerocash_pour_proving_key<ZerocashParams::zerocash_pp> LoadProvingKeyFromFile(std::string path, const unsigned int tree_depth);
+    static zerocash_pour_verification_key<ZerocashParams::zerocash_pp> LoadVerificationKeyFromFile(std::string path, const unsigned int tree_depth);
 private:
     int treeDepth;
-    zerocash_pour_keypair<zerocash_pp>* kp_v1;
+    zerocash_pour_proving_key<ZerocashParams::zerocash_pp>* params_pk_v1;
+    zerocash_pour_verification_key<ZerocashParams::zerocash_pp>* params_vk_v1;
 };
 
 } /* namespace libzerocash */

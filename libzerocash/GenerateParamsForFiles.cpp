@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "Zerocash.h"
+#include "ZerocashParams.h"
 #include "libsnark/common/default_types/r1cs_ppzksnark_pp.hpp"
 #include "libsnark/zk_proof_systems/ppzksnark/r1cs_ppzksnark/r1cs_ppzksnark.hpp"
 #include "zerocash_pour_ppzksnark/zerocash_pour_gadget.hpp"
@@ -30,26 +31,14 @@ int main(int argc, char **argv)
     std::string pkFile = argv[2];
     std::string vkFile = argv[3];
 
-    default_r1cs_ppzksnark_pp::init_public_params();
-    zerocash_pour_keypair<default_r1cs_ppzksnark_pp> kp = zerocash_pour_keypair<default_r1cs_ppzksnark_pp>(zerocash_pour_ppzksnark_generator<default_r1cs_ppzksnark_pp>(2, 2, tree_depth));
+    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    libzerocash::ZerocashParams p(
+        tree_depth,
+        &thing
+    );
 
-    std::stringstream ssProving;
-    ssProving << kp.pk.r1cs_pk;
-    std::ofstream pkFilePtr;
-    pkFilePtr.open(pkFile, std::ios::binary);
-    ssProving.rdbuf()->pubseekpos(0, std::ios_base::out);
-    pkFilePtr << ssProving.rdbuf();
-    pkFilePtr.flush();
-    pkFilePtr.close();
-
-    std::stringstream ssVerification;
-    ssVerification << kp.vk.r1cs_vk;
-    std::ofstream vkFilePtr;
-    vkFilePtr.open(vkFile, std::ios::binary);
-    ssVerification.rdbuf()->pubseekpos(0, std::ios_base::out);
-    vkFilePtr << ssVerification.rdbuf();
-    vkFilePtr.flush();
-    vkFilePtr.close();
+    libzerocash::ZerocashParams::SaveProvingKeyToFile(&p.getProvingKey(), pkFile);
+    libzerocash::ZerocashParams::SaveVerificationKeyToFile(&p.getVerificationKey(), vkFile);
 
     return 0;
 }
