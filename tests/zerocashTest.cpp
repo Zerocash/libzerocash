@@ -92,18 +92,33 @@ int SaveAndLoadKeysFromFiles(int tree_depth) {
     std::string vk_path = "./zerocashTest-verification-key";
     std::string pk_path = "./zerocashTest-proving-key";
 
+    libzerocash::timer_start("Saving Proving Key");
+
     libzerocash::ZerocashParams::SaveProvingKeyToFile(
         &p.getProvingKey(),
         pk_path
     );
+
+    libzerocash::timer_stop("Saving Proving Key");
+
+    libzerocash::timer_start("Saving Verification Key");
 
     libzerocash::ZerocashParams::SaveVerificationKeyToFile(
         &p.getVerificationKey(),
         vk_path
     );
 
+    libzerocash::timer_stop("Saving Verification Key");
+
+    libzerocash::timer_start("Loading Proving Key");
     auto pk_loaded = libzerocash::ZerocashParams::LoadProvingKeyFromFile(pk_path, tree_depth);
+    libzerocash::timer_stop("Loading Proving Key");
+
+    libzerocash::timer_start("Loading Verification Key");
     auto vk_loaded = libzerocash::ZerocashParams::LoadVerificationKeyFromFile(vk_path, tree_depth);
+    libzerocash::timer_stop("Loading Verification Key");
+
+    cout << "Comparing Proving and Verification key.\n" << endl;
 
     return (p.getProvingKey() == pk_loaded) && (p.getVerificationKey() == vk_loaded);
 }

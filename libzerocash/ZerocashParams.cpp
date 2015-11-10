@@ -33,7 +33,7 @@ zerocash_pour_keypair<ZerocashParams::zerocash_pp> ZerocashParams::GenerateNewKe
 void ZerocashParams::SaveProvingKeyToFile(const zerocash_pour_proving_key<ZerocashParams::zerocash_pp>* p_pk_1, std::string path)
 {
     std::stringstream ssProving;
-    ssProving << p_pk_1;
+    ssProving << p_pk_1->r1cs_pk;
     std::ofstream pkFilePtr;
     pkFilePtr.open(path, std::ios::binary);
     ssProving.rdbuf()->pubseekpos(0, std::ios_base::out);
@@ -46,7 +46,7 @@ void ZerocashParams::SaveProvingKeyToFile(const zerocash_pour_proving_key<Zeroca
 void ZerocashParams::SaveVerificationKeyToFile(const zerocash_pour_verification_key<ZerocashParams::zerocash_pp>* p_vk_1, std::string path)
 {
     std::stringstream ssVerification;
-    ssVerification << p_vk_1;
+    ssVerification << p_vk_1->r1cs_vk;
     std::ofstream vkFilePtr;
     vkFilePtr.open(path, std::ios::binary);
     ssVerification.rdbuf()->pubseekpos(0, std::ios_base::out);
@@ -146,14 +146,20 @@ ZerocashParams::~ZerocashParams()
 
 const zerocash_pour_proving_key<ZerocashParams::zerocash_pp>& ZerocashParams::getProvingKey()
 {
-    // XXX throw an exception if it's null
-    return *params_pk_v1;
+    if (params_pk_v1 != NULL) {
+        return *params_pk_v1;
+    } else {
+        throw ZerocashException("Pour proving key not set.");
+    }
 }
 
 const zerocash_pour_verification_key<ZerocashParams::zerocash_pp>& ZerocashParams::getVerificationKey()
 {
-    // XXX throw an exception if it's null
-    return *params_vk_v1;
+    if (params_vk_v1 != NULL) {
+        return *params_vk_v1;
+    } else {
+        throw ZerocashException("Pour verification key not set.");
+    }
 }
 
 } /* namespace libzerocash */
