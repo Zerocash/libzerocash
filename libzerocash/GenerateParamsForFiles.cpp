@@ -31,10 +31,10 @@ int main(int argc, char **argv)
     std::string pkFile = argv[2];
     std::string vkFile = argv[3];
 
-    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
     libzerocash::ZerocashParams p(
         tree_depth,
-        &thing
+        &keypair
     );
 
     libzerocash::ZerocashParams::SaveProvingKeyToFile(&p.getProvingKey(), pkFile);
