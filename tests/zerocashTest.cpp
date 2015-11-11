@@ -79,10 +79,10 @@ int SaveAndLoadKeysFromFiles(int tree_depth) {
     cout << "Creating Params...\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
     libzerocash::ZerocashParams p(
         tree_depth,
-        &thing
+        &keypair
     );
     libzerocash::timer_stop("Param Generation");
     print_mem("after param generation");
@@ -208,10 +208,10 @@ bool PourTxTest(const size_t tree_depth) {
     cout << "Creating Params...\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
     libzerocash::ZerocashParams p(
         tree_depth,
-        &thing
+        &keypair
     );
     libzerocash::timer_stop("Param Generation");
     print_mem("after param generation");
@@ -436,10 +436,10 @@ bool SimpleTxTest(const size_t tree_depth) {
     cout << "\nSIMPLE TRANSACTION TEST\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    auto thing = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
     libzerocash::ZerocashParams p(
         tree_depth,
-        &thing
+        &keypair
     );
     libzerocash::timer_stop("Param Generation");
 
