@@ -569,7 +569,7 @@ int main(int argc, char **argv)
     std::cout << "\nSimpleTxTest result => " << simpleTxResult << std::endl;
     std::cout << "\nSaveAndLoadKeysFromFiles result => " << saveAndLoadKeysFromFiles << std::endl;
 
-    return merkleSimpleResult && addressResult &&
+    return !(merkleSimpleResult && addressResult &&
         coinResult && mintTxResult && saveAndLoadKeysFromFiles
-        && pourTxResult && simpleTxResult;
+        && pourTxResult && simpleTxResult);
 }
