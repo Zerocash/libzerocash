@@ -120,7 +120,104 @@ int SaveAndLoadKeysFromFiles(int tree_depth) {
 
     cout << "Comparing Proving and Verification key.\n" << endl;
 
-    return (p.getProvingKey() == pk_loaded) && (p.getVerificationKey() == vk_loaded);
+    if ( !( p.getProvingKey() == pk_loaded && p.getVerificationKey() == vk_loaded) ) {
+        return false;
+    }
+
+    vector<libzerocash::Coin> coins(5);
+    vector<libzerocash::Address> addrs(5);
+
+    cout << "Creating Addresses and Coins...\n" << endl;
+    for(size_t i = 0; i < coins.size(); i++) {
+        addrs.at(i) = libzerocash::Address();
+        coins.at(i) = libzerocash::Coin(addrs.at(i).getPublicAddress(), i);
+    }
+    cout << "Successfully created address and coins.\n" << endl;
+
+    cout << "Creating a Mint Transaction...\n" << endl;
+    libzerocash::MintTransaction minttx(coins.at(0));
+    cout << "Successfully created a Mint Transaction.\n" << endl;
+
+    cout << "Serializing a mint transaction...\n" << endl;
+    CDataStream serializedMintTx(SER_NETWORK, 7002);
+    serializedMintTx << minttx;
+    cout << "Successfully serialized a mint transaction.\n" << endl;
+
+    libzerocash::MintTransaction minttxNew;
+    serializedMintTx >> minttxNew;
+    cout << "Successfully deserialized a mint transaction.\n" << endl;
+
+    cout << "Verifying a Mint Transaction...\n" << endl;
+    bool minttx_res = minttxNew.verify();
+
+    vector<std::vector<bool>> coinValues(5);
+    vector<bool> temp_comVal(cm_size * 8);
+    for(size_t i = 0; i < coinValues.size(); i++) {
+        libzerocash::convertBytesVectorToVector(coins.at(i).getCoinCommitment().getCommitmentValue(), temp_comVal);
+        coinValues.at(i) = temp_comVal;
+    }
+
+    cout << "Creating Merkle Tree...\n" << endl;
+    libzerocash::MerkleTree merkleTree(coinValues, tree_depth);
+    cout << "Successfully created Merkle Tree.\n" << endl;
+
+    cout << "Creating Witness 1...\n" << endl;
+    merkle_authentication_path witness_1(tree_depth);
+    merkleTree.getWitness(coinValues.at(1), witness_1);
+    cout << "Successfully created Witness 1.\n" << endl;
+
+    cout << "Creating Witness 2...\n" << endl;
+    merkle_authentication_path witness_2(tree_depth);
+    merkleTree.getWitness(coinValues.at(3), witness_2);
+    cout << "Successfully created Witness 2.\n" << endl;
+
+    cout << "Creating coins to spend...\n" << endl;
+    libzerocash::Address newAddress3;
+    libzerocash::PublicAddress pubAddress3 = newAddress3.getPublicAddress();
+
+    libzerocash::Address newAddress4;
+    libzerocash::PublicAddress pubAddress4 = newAddress4.getPublicAddress();
+
+    libzerocash::Coin c_1_new(pubAddress3, 2);
+    libzerocash::Coin c_2_new(pubAddress4, 2);
+    cout << "Successfully created coins to spend.\n" << endl;
+
+    vector<bool> root_bv(root_size * 8);
+    merkleTree.getRootValue(root_bv);
+    vector<unsigned char> rt(root_size);
+    libzerocash::convertVectorToBytesVector(root_bv, rt);
+
+
+    vector<unsigned char> as(sig_pk_size, 'a');
+
+    cout << "Creating a pour transaction...\n" << endl;
+    libzerocash::PourTransaction pourtx(1, p,
+    		rt,
+    		coins.at(1), coins.at(3),
+    		addrs.at(1), addrs.at(3),
+                1, 3,
+    		witness_1, witness_2,
+    		pubAddress3, pubAddress4,
+    		0,
+    		as,
+    		c_1_new, c_2_new);
+    cout << "Successfully created a pour transaction.\n" << endl;
+
+    cout << "Serializing a pour transaction...\n" << endl;
+    CDataStream serializedPourTx(SER_NETWORK, 7002);
+    serializedPourTx << pourtx;
+    cout << "Successfully serialized a pour transaction.\n" << endl;
+
+    libzerocash::PourTransaction pourtxNew;
+    serializedPourTx >> pourtxNew;
+    cout << "Successfully deserialized a pour transaction.\n" << endl;
+
+	std::vector<unsigned char> pubkeyHash(sig_pk_size, 'a');
+
+    cout << "Verifying a pour transaction...\n" << endl;
+    bool pourtx_res = pourtxNew.verify(p, pubkeyHash, rt);
+
+    return (minttx_res && pourtx_res);
 }
 
 int CoinTest() {
