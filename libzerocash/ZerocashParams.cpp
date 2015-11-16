@@ -121,6 +121,8 @@ ZerocashParams::ZerocashParams(
 ) :
     treeDepth(tree_depth)
 {
+    assert(p_pk_1 != NULL || p_vk_1 != NULL);
+
     if (p_pk_1 == NULL) {
         params_pk_v1 = NULL;
     } else {
