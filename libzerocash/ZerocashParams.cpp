@@ -12,9 +12,17 @@
  *****************************************************************************/
 
 #include <fstream>
+#include <boost/format.hpp>
 
 #include "Zerocash.h"
 #include "ZerocashParams.h"
+
+static void throw_missing_param_file_exception(std::string paramtype, std::string path) {
+    /* paramtype should be either "proving" or "verifying". */
+    const char* tmpl = ("Could not open %s key file: %s\n"
+                        "Please refer to user documentation for installing this file.");
+    throw ZerocashException((boost::format(tmpl) % paramtype % path).str());
+}
 
 namespace libzerocash {
 
@@ -61,7 +69,7 @@ zerocash_pour_proving_key<ZerocashParams::zerocash_pp> ZerocashParams::LoadProvi
     std::ifstream fileProving(path, std::ios::binary);
 
     if(!fileProving.is_open()) {
-        throw ZerocashException("Could not open proving key file.");
+        throw_missing_param_file_exception("proving", path);
     }
 
     ssProving << fileProving.rdbuf();
@@ -86,7 +94,7 @@ zerocash_pour_verification_key<ZerocashParams::zerocash_pp> ZerocashParams::Load
     std::ifstream fileVerification(path, std::ios::binary);
 
     if(!fileVerification.is_open()) {
-        throw ZerocashException("Could not open verification key file.");
+        throw_missing_param_file_exception("verification", path);
     }
 
     ssVerification << fileVerification.rdbuf();
