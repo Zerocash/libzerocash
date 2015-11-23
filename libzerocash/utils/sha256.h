@@ -30,6 +30,6 @@ typedef struct {
 void sha256_init(SHA256_CTX_mod *ctx);
 void sha256_update(SHA256_CTX_mod *ctx, const BYTE data[], size_t len);
 void sha256_length_padding(SHA256_CTX_mod *ctx);
-void sha256_final(SHA256_CTX_mod *ctx, BYTE hash[]);
+void sha256_final_no_padding(SHA256_CTX_mod *ctx, BYTE hash[]);
 
 #endif   // SHA256H_H

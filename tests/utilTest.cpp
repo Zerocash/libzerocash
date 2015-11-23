@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE( testSHA256TestVectors ) {
     sha256_init(&ctx256);
     sha256_update(&ctx256, preimage, 3);
     sha256_length_padding(&ctx256);
-    sha256_final(&ctx256, actual_hash);
+    sha256_final_no_padding(&ctx256, actual_hash);
 
     BOOST_CHECK( memcmp(expected_hash, actual_hash, 32) == 0 );
 }
