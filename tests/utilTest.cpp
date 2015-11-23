@@ -234,9 +234,9 @@ BOOST_AUTO_TEST_CASE( testConcatenateTwoBoolVectors ) {
 }
 
 BOOST_AUTO_TEST_CASE( testConcatenateTwoByteVectors ) {
-    std::vector<unsigned char> front = { 0, 1, 0 };
-    std::vector<unsigned char> back = { 1, 0, 1 };
-    std::vector<unsigned char> expected = { 0, 1, 0, 1, 0, 1 };
+    std::vector<unsigned char> front = { 0, 1, 2 };
+    std::vector<unsigned char> back = { 3, 4, 5 };
+    std::vector<unsigned char> expected = { 0, 1, 2, 3, 4, 5 };
     std::vector<unsigned char> actual;
     libzerocash::concatenateVectors(front, back, actual);
     BOOST_CHECK( expected == actual );
