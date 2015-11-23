@@ -52,9 +52,9 @@ void concatenateVectors(const std::vector<bool>& A, const std::vector<bool>& B, 
 
 void concatenateVectors(const std::vector<unsigned char>& A, const std::vector<unsigned char>& B, const std::vector<unsigned char>& C, std::vector<unsigned char>& result);
 
-void sha256(unsigned char* input, unsigned char* hash, int len);
+void sha256(const unsigned char* input, unsigned char* hash, int len);
 
-void sha256(SHA256_CTX_mod* ctx256, unsigned char* input, unsigned char* hash, int len);
+void sha256(SHA256_CTX_mod* ctx256, const unsigned char* input, unsigned char* hash, int len);
 
 void hashVector(SHA256_CTX_mod* ctx256, const std::vector<bool> input, std::vector<bool>& output);
 
