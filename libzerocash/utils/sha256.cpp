@@ -10,10 +10,6 @@
               Algorithm specification can be found here:
                * http://csrc.nist.gov/publications/fips/fips180-2/fips180-2withchangenotice.pdf
               This implementation uses little endian byte order.
-*
-* WARNING:    The length padding has been REMOVED from this implementation of
-*             SHA256 and is therefore unsuitable for hashing variable-length
-*             messages.
 *********************************************************************/
 
 /*************************** HEADER FILES ***************************/
@@ -115,8 +111,8 @@ void sha256_update(SHA256_CTX_mod *ctx, const BYTE data[], size_t len)
 	}
 }
 
-/* Applies the length padding, which libzerocash does not use.
- * Call before sha256_final() to get the test-vector compliant SHA256 hash. */
+/* Applies the length padding, which libzerocash does not use. Call before
+ * sha256_final_no_padding() to get the test-vector compliant SHA256 hash. */
 void sha256_length_padding(SHA256_CTX_mod *ctx)
 {
 	WORD i;
@@ -150,7 +146,7 @@ void sha256_length_padding(SHA256_CTX_mod *ctx)
 	sha256_transform(ctx, ctx->data);
 }
 
-void sha256_final(SHA256_CTX_mod *ctx, BYTE hash[])
+void sha256_final_no_padding(SHA256_CTX_mod *ctx, BYTE hash[])
 {
 	WORD i;
 

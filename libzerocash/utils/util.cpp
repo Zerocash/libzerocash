@@ -187,13 +187,13 @@ void sha256(const unsigned char* input, unsigned char* hash, int len) {
 
 	sha256_init(&ctx256);
 	sha256_update(&ctx256, input, len);
-	sha256_final(&ctx256, hash);
+	sha256_final_no_padding(&ctx256, hash);
 }
 
 void sha256(SHA256_CTX_mod* ctx256, const unsigned char* input, unsigned char* hash, int len) {
 	sha256_init(ctx256);
 	sha256_update(ctx256, input, len);
-	sha256_final(ctx256, hash);
+	sha256_final_no_padding(ctx256, hash);
 }
 
 void hashVector(SHA256_CTX_mod* ctx256, const std::vector<bool> input, std::vector<bool>& output) {
