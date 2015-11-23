@@ -47,6 +47,7 @@ EXECUTABLES= \
 	zerocash_pour_ppzksnark/tests/test_zerocash_pour_ppzksnark \
 	zerocash_pour_ppzksnark/profiling/profile_zerocash_pour_gadget \
 	tests/zerocashTest \
+	tests/utilTest \
 	tests/merkleTest \
 	libzerocash/GenerateParamsForFiles
 
