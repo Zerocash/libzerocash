@@ -12,3 +12,5 @@ tests/zerocashTest
 tests/merkleTest
 tests/utilTest
 libzerocash/GenerateParamsForFiles
+zerocashTest-proving-key
+zerocashTest-verification-key
