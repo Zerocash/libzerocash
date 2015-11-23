@@ -10,6 +10,10 @@
               Algorithm specification can be found here:
                * http://csrc.nist.gov/publications/fips/fips180-2/fips180-2withchangenotice.pdf
               This implementation uses little endian byte order.
+*
+* WARNING:    The length padding has been REMOVED from this implementation of
+*             SHA256 and is therefore unsuitable for hashing variable-length
+*             messages.
 *********************************************************************/
 
 /*************************** HEADER FILES ***************************/
@@ -111,11 +115,44 @@ void sha256_update(SHA256_CTX_mod *ctx, const BYTE data[], size_t len)
 	}
 }
 
-void sha256_final(SHA256_CTX_mod *ctx, BYTE hash[])
+/* Applies the length padding, which libzerocash does not use.
+ * Call before sha256_final() to get the test-vector compliant SHA256 hash. */
+void sha256_length_padding(SHA256_CTX_mod *ctx)
 {
 	WORD i;
 
 	i = ctx->datalen;
+
+	// Pad whatever data is left in the buffer.
+	if (ctx->datalen < 56) {
+		ctx->data[i++] = 0x80;
+		while (i < 56)
+			ctx->data[i++] = 0x00;
+	}
+	else {
+		ctx->data[i++] = 0x80;
+		while (i < 64)
+			ctx->data[i++] = 0x00;
+		sha256_transform(ctx, ctx->data);
+		memset(ctx->data, 0, 56);
+	}
+
+	// Append to the padding the total message's length in bits and transform.
+	ctx->bitlen += ctx->datalen * 8;
+	ctx->data[63] = ctx->bitlen;
+	ctx->data[62] = ctx->bitlen >> 8;
+	ctx->data[61] = ctx->bitlen >> 16;
+	ctx->data[60] = ctx->bitlen >> 24;
+	ctx->data[59] = ctx->bitlen >> 32;
+	ctx->data[58] = ctx->bitlen >> 40;
+	ctx->data[57] = ctx->bitlen >> 48;
+	ctx->data[56] = ctx->bitlen >> 56;
+	sha256_transform(ctx, ctx->data);
+}
+
+void sha256_final(SHA256_CTX_mod *ctx, BYTE hash[])
+{
+	WORD i;
 
 	for (i = 0; i < 4; ++i) {
 		hash[i]      = (ctx->state[0] >> (24 - i * 8)) & 0x000000ff;

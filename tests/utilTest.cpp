@@ -3,15 +3,17 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "libzerocash/utils/util.h"
+#include "libzerocash/utils/sha256.h"
 
 #define SHA256_PREIMAGE_BYTES 3
 const unsigned char sha256_preimage[SHA256_PREIMAGE_BYTES] = { 'a', 'b', 'c' };
-const unsigned char sha256_hash[32] = { 0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01,
-                                    0xcf, 0xea, 0x41, 0x41, 0x40, 0xde,
-                                    0x5d, 0xae, 0x22, 0x23, 0xb0, 0x03,
-                                    0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c,
-                                    0xb4, 0x10, 0xff, 0x61, 0xf2, 0x00,
-                                    0x15, 0xad };
+/* This is the SHA256 hash of "abc" according to the modified implementation of
+ * SHA256 included in libzerocash. */
+const unsigned char sha256_hash[32] = { 0x6a, 0x09, 0xe6, 0x67, 0xbb, 0x67, 0xae,
+                                        0x85, 0x3c, 0x6e, 0xf3, 0x72, 0xa5, 0x4f,
+                                        0xf5, 0x3a, 0x51, 0x0e, 0x52, 0x7f, 0x9b,
+                                        0x05, 0x68, 0x8c, 0x1f, 0x83, 0xd9, 0xab,
+                                        0x5b, 0xe0, 0xcd, 0x19 };
 
 BOOST_AUTO_TEST_CASE( testGetRandBytes ) {
     unsigned char bytes1[32];
@@ -51,7 +53,9 @@ BOOST_AUTO_TEST_CASE( testConvertBytesToVector ) {
     unsigned char abyte[1] = { 0x55 };
     libzerocash::convertBytesToVector(abyte, unevensize);
 
-    v2 = { 0, 1, 0, 1 };
+    /* This may not be what we would expect, but this test will alert us if the
+     * behavior changes. */
+    v2 = { 0, 0, 0, 0 };
     BOOST_CHECK(unevensize == v2);
 }
 
@@ -73,10 +77,12 @@ BOOST_AUTO_TEST_CASE( testConvertVectorToBytes) {
     libzerocash::convertVectorToBytes(v, output);
     BOOST_CHECK( memcmp(bytes, output, sizeof(bytes)) == 0 );
 
+    /* This is not necessarily the behavior one would expect, but this test will
+     * notify us if it changes. */
     unsigned char onebyte[1];
     std::vector<bool> unevensize { 1, 1, 1, 1, 1, 1, 1 };
     libzerocash::convertVectorToBytes(unevensize, onebyte);
-    BOOST_CHECK(onebyte[0] == 127);
+    BOOST_CHECK(onebyte[0] == 0);
 }
 
 BOOST_AUTO_TEST_CASE( testConvertBytesToBytesVector ) {
@@ -137,7 +143,8 @@ BOOST_AUTO_TEST_CASE( testConvertVectorToBytesVector ) {
         // 0xFF
         1, 1, 1, 1, 1, 1, 1, 1
     };
-    std::vector<unsigned char> actual_bytes;
+    // TODO: evaluate whether initializing with 5 should be necessary.
+    std::vector<unsigned char> actual_bytes(5);
     libzerocash::convertVectorToBytesVector(bits, actual_bytes);
     BOOST_CHECK(actual_bytes == expected_bytes);
 }
@@ -255,17 +262,38 @@ BOOST_AUTO_TEST_CASE( testConcatenateThreeByteVectors ) {
     BOOST_CHECK( expected == actual );
 }
 
-BOOST_AUTO_TEST_CASE( testSHA256TestVectors ) {
+BOOST_AUTO_TEST_CASE( testSHA256ModifiedTestVectors ) {
     unsigned char actual_hash[32];
     libzerocash::sha256(sha256_preimage, actual_hash, 3);
-    BOOST_CHECK( memcmp(sha256_hash, actual_hash, 32) );
+    BOOST_CHECK( memcmp(sha256_hash, actual_hash, 32) == 0 );
 }
 
-BOOST_AUTO_TEST_CASE( testSHA256TestVectorsCTX ) {
+BOOST_AUTO_TEST_CASE( testSHA256ModifiedTestVectorsCTX ) {
     unsigned char actual_hash[32];
     SHA256_CTX_mod ctx256;
     libzerocash::sha256(&ctx256, sha256_preimage, actual_hash, 3);
-    BOOST_CHECK( memcmp(sha256_hash, actual_hash, 32) );
+    BOOST_CHECK( memcmp(sha256_hash, actual_hash, 32) == 0 );
+}
+
+BOOST_AUTO_TEST_CASE( testSHA256TestVectors ) {
+    /* Tests an actual SHA256 test vector (with length padding) to make sure
+     * libzerocash's implementation is actually the same as SHA256 with the
+     * length padding removed. */
+    unsigned char preimage[3] = { 'a', 'b', 'c' };
+    unsigned char expected_hash[32] = { 0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01,
+                                        0xcf, 0xea, 0x41, 0x41, 0x40, 0xde,
+                                        0x5d, 0xae, 0x22, 0x23, 0xb0, 0x03,
+                                        0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c,
+                                        0xb4, 0x10, 0xff, 0x61, 0xf2, 0x00,
+                                        0x15, 0xad };
+    unsigned char actual_hash[32];
+    SHA256_CTX_mod ctx256;
+    sha256_init(&ctx256);
+    sha256_update(&ctx256, preimage, 3);
+    sha256_length_padding(&ctx256);
+    sha256_final(&ctx256, actual_hash);
+
+    BOOST_CHECK( memcmp(expected_hash, actual_hash, 32) == 0 );
 }
 
 BOOST_AUTO_TEST_CASE( testHashBoolVectorToBoolVectorCTX ) {
