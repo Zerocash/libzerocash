@@ -1,5 +1,5 @@
 OPTFLAGS = -march=native -mtune=native -O2
-CXXFLAGS += -g -Wall -Wextra -Werror -Wfatal-errors -Wno-unused-parameter -std=c++11 -fPIC -Wno-unused-variable
+CXXFLAGS += -g -Wall -Wextra -Wno-unused-parameter -std=c++11 -fPIC -Wno-unused-variable
 LDFLAGS += -flto
 
 DEPSRC=depsrc
@@ -12,8 +12,10 @@ LDLIBS += -L $(DEPINST)/lib -Wl,-rpath $(DEPINST)/lib -L . -lsnark -lgmpxx -lgmp
 
 ifeq ($(USE_MT),1)
 	LDLIBS += -lboost_system-mt
+	LDLIBS += -lboost_unit_test_framework-mt
 else
 	LDLIBS += -lboost_system
+	LDLIBS += -lboost_unit_test_framework
 endif
 
 LDLIBS += -lcrypto -lcryptopp -lz -ldl

@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <iostream>
 
+#define BOOST_TEST_MODULE zerocashTest
+#include <boost/test/included/unit_test.hpp>
+
 #include "timer.h"
 
 #include "libzerocash/Zerocash.h"
@@ -39,7 +42,9 @@ vector<bool> convertIntToVector(uint64_t val) {
 	return ret;
 }
 
-int AddressTest() {
+#define TEST_TREE_DEPTH 4
+
+BOOST_AUTO_TEST_CASE( AddressTest ) {
     cout << "\nADDRESS TEST\n" << endl;
 
     libzerocash::timer_start("Address");
@@ -70,18 +75,18 @@ int AddressTest() {
 
     bool result = ((newAddress == addressNew) && (pubAddress == pubAddressNew));
 
-    return result;
+    BOOST_CHECK(result);
 }
 
-int SaveAndLoadKeysFromFiles(int tree_depth) {
+BOOST_AUTO_TEST_CASE( SaveAndLoadKeysFromFiles ) {
     cout << "\nSaveAndLoadKeysFromFiles TEST\n" << endl;
 
     cout << "Creating Params...\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(TEST_TREE_DEPTH);
     libzerocash::ZerocashParams p(
-        tree_depth,
+        TEST_TREE_DEPTH,
         &keypair
     );
     libzerocash::timer_stop("Param Generation");
@@ -111,17 +116,17 @@ int SaveAndLoadKeysFromFiles(int tree_depth) {
     libzerocash::timer_stop("Saving Verification Key");
 
     libzerocash::timer_start("Loading Proving Key");
-    auto pk_loaded = libzerocash::ZerocashParams::LoadProvingKeyFromFile(pk_path, tree_depth);
+    auto pk_loaded = libzerocash::ZerocashParams::LoadProvingKeyFromFile(pk_path, TEST_TREE_DEPTH);
     libzerocash::timer_stop("Loading Proving Key");
 
     libzerocash::timer_start("Loading Verification Key");
-    auto vk_loaded = libzerocash::ZerocashParams::LoadVerificationKeyFromFile(vk_path, tree_depth);
+    auto vk_loaded = libzerocash::ZerocashParams::LoadVerificationKeyFromFile(vk_path, TEST_TREE_DEPTH);
     libzerocash::timer_stop("Loading Verification Key");
 
     cout << "Comparing Proving and Verification key.\n" << endl;
 
     if ( !( p.getProvingKey() == pk_loaded && p.getVerificationKey() == vk_loaded) ) {
-        return false;
+        BOOST_ERROR("Proving and verification key are not equal.");
     }
 
     vector<libzerocash::Coin> coins(5);
@@ -158,16 +163,16 @@ int SaveAndLoadKeysFromFiles(int tree_depth) {
     }
 
     cout << "Creating Merkle Tree...\n" << endl;
-    libzerocash::MerkleTree merkleTree(coinValues, tree_depth);
+    libzerocash::MerkleTree merkleTree(coinValues, TEST_TREE_DEPTH);
     cout << "Successfully created Merkle Tree.\n" << endl;
 
     cout << "Creating Witness 1...\n" << endl;
-    merkle_authentication_path witness_1(tree_depth);
+    merkle_authentication_path witness_1(TEST_TREE_DEPTH);
     merkleTree.getWitness(coinValues.at(1), witness_1);
     cout << "Successfully created Witness 1.\n" << endl;
 
     cout << "Creating Witness 2...\n" << endl;
-    merkle_authentication_path witness_2(tree_depth);
+    merkle_authentication_path witness_2(TEST_TREE_DEPTH);
     merkleTree.getWitness(coinValues.at(3), witness_2);
     cout << "Successfully created Witness 2.\n" << endl;
 
@@ -217,10 +222,10 @@ int SaveAndLoadKeysFromFiles(int tree_depth) {
     cout << "Verifying a pour transaction...\n" << endl;
     bool pourtx_res = pourtxNew.verify(p, pubkeyHash, rt);
 
-    return (minttx_res && pourtx_res);
+    BOOST_CHECK(minttx_res && pourtx_res);
 }
 
-int CoinTest() {
+BOOST_AUTO_TEST_CASE( CoinTest ) {
     cout << "\nCOIN TEST\n" << endl;
 
     libzerocash::Address newAddress;
@@ -260,10 +265,10 @@ int CoinTest() {
 
     bool result = ((coin == coinNew) && (coin2 == coinNew2));
 
-    return result;
+    BOOST_CHECK(result);
 }
 
-bool MintTxTest() {
+BOOST_AUTO_TEST_CASE( MintTxTest ) {
     cout << "\nMINT TRANSACTION TEST\n" << endl;
 
     libzerocash::Address newAddress;
@@ -296,18 +301,18 @@ bool MintTxTest() {
     bool minttx_res = minttxNew.verify();
     libzerocash::timer_stop("Mint Transaction Verify");
 
-    return minttx_res;
+    BOOST_CHECK(minttx_res);
 }
 
-bool PourTxTest(const size_t tree_depth) {
+BOOST_AUTO_TEST_CASE( PourTxTest ) {
     cout << "\nPOUR TRANSACTION TEST\n" << endl;
 
     cout << "Creating Params...\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(TEST_TREE_DEPTH);
     libzerocash::ZerocashParams p(
-        tree_depth,
+        TEST_TREE_DEPTH,
         &keypair
     );
     libzerocash::timer_stop("Param Generation");
@@ -337,17 +342,16 @@ bool PourTxTest(const size_t tree_depth) {
     cout << "Creating Merkle Tree...\n" << endl;
 
     libzerocash::timer_start("Merkle Tree");
-    libzerocash::IncrementalMerkleTree merkleTree(coinValues, tree_depth);
+    libzerocash::IncrementalMerkleTree merkleTree(coinValues, TEST_TREE_DEPTH);
     libzerocash::timer_stop("Merkle Tree");
 
     cout << "Successfully created Merkle Tree.\n" << endl;
 
-    merkle_authentication_path witness_1(tree_depth);
+    merkle_authentication_path witness_1(TEST_TREE_DEPTH);
 
     libzerocash::timer_start("Witness");
     if (merkleTree.getWitness(convertIntToVector(1), witness_1) == false) {
-		cout << "Could not get witness" << endl;
-		return false;
+        BOOST_ERROR("Could not get witness");
 	}
     libzerocash::timer_stop("Witness");
 
@@ -357,7 +361,7 @@ bool PourTxTest(const size_t tree_depth) {
     }
     cout << "\n" << endl;
 
-    merkle_authentication_path witness_2(tree_depth);
+    merkle_authentication_path witness_2(TEST_TREE_DEPTH);
     if (merkleTree.getWitness(convertIntToVector(3), witness_2) == false) {
 		cout << "Could not get witness" << endl;
 	}
@@ -411,10 +415,10 @@ bool PourTxTest(const size_t tree_depth) {
     bool pourtx_res = pourtxNew.verify(p, pubkeyHash, rt);
     libzerocash::timer_stop("Pour Transaction Verify");
 
-    return pourtx_res;
+    BOOST_CHECK(pourtx_res);
 }
 
-bool MerkleTreeSimpleTest() {
+BOOST_AUTO_TEST_CASE( MerkleTreeSimpleTest ) {
     cout << "\nMERKLE TREE SIMPLE TEST\n" << endl;
 
     vector<libzerocash::Coin> coins(5);
@@ -492,8 +496,7 @@ bool MerkleTreeSimpleTest() {
 
     merkle_authentication_path witness(3);
 	if (merkleTree.getWitness(convertIntToVector(1), witness) == false) {
-		cout << "Witness generation failed." << endl;
-		return false;
+		BOOST_ERROR("Witness generation failed.");
 	}
 
     cout << "Successfully created witness.\n" << endl;
@@ -526,16 +529,16 @@ bool MerkleTreeSimpleTest() {
     libzerocash::hashVectors(vector<bool>(SHA256_BLOCK_SIZE * 8, 0), vector<bool>(SHA256_BLOCK_SIZE * 8, 0), inter_2);
     libzerocash::hashVectors(inter_1, inter_2, wit3);
 
-    return ((witness.at(0) == wit3) && (witness.at(1) == wit2) && (witness.at(2) == wit1));
+    BOOST_CHECK((witness.at(0) == wit3) && (witness.at(1) == wit2) && (witness.at(2) == wit1));
 }
 
-bool SimpleTxTest(const size_t tree_depth) {
+BOOST_AUTO_TEST_CASE( SimpleTxTest ) {
     cout << "\nSIMPLE TRANSACTION TEST\n" << endl;
 
     libzerocash::timer_start("Param Generation");
-    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(tree_depth);
+    auto keypair = libzerocash::ZerocashParams::GenerateNewKeyPair(TEST_TREE_DEPTH);
     libzerocash::ZerocashParams p(
-        tree_depth,
+        TEST_TREE_DEPTH,
         &keypair
     );
     libzerocash::timer_stop("Param Generation");
@@ -574,19 +577,18 @@ bool SimpleTxTest(const size_t tree_depth) {
     }
 
     cout << "Creating Merkle Tree...\n" << endl;
-    libzerocash::IncrementalMerkleTree merkleTree(coinValues, tree_depth);
+    libzerocash::IncrementalMerkleTree merkleTree(coinValues, TEST_TREE_DEPTH);
     cout << "Successfully created Merkle Tree.\n" << endl;
 
     cout << "Creating Witness 1...\n" << endl;
-    merkle_authentication_path witness_1(tree_depth);
+    merkle_authentication_path witness_1(TEST_TREE_DEPTH);
     if (merkleTree.getWitness(convertIntToVector(1), witness_1) == false) {
-		cout << "Could not get witness" << endl;
-		return false;
+		BOOST_ERROR("Could not get witness");
 	}
     cout << "Successfully created Witness 1.\n" << endl;
 
     cout << "Creating Witness 2...\n" << endl;
-    merkle_authentication_path witness_2(tree_depth);
+    merkle_authentication_path witness_2(TEST_TREE_DEPTH);
     if (merkleTree.getWitness(convertIntToVector(3), witness_2) == false) {
 		cout << "Could not get witness" << endl;
 	}
@@ -638,35 +640,5 @@ bool SimpleTxTest(const size_t tree_depth) {
     cout << "Verifying a pour transaction...\n" << endl;
     bool pourtx_res = pourtxNew.verify(p, pubkeyHash, rt);
 
-    return (minttx_res && pourtx_res);
-}
-
-int main(int argc, char **argv)
-{
-	cout << "libzerocash v" << ZEROCASH_VERSION_STRING << " test." << endl << endl;
-
-    const size_t tree_depth = 4;
-
-    start_profiling();
-	bool merkleSimpleResult = MerkleTreeSimpleTest();
-    bool addressResult = AddressTest();
-    bool coinResult = CoinTest();
-    bool mintTxResult = MintTxTest();
-    bool saveAndLoadKeysFromFiles = SaveAndLoadKeysFromFiles(tree_depth);
-
-    bool pourTxResult = PourTxTest(tree_depth);
-    bool simpleTxResult = SimpleTxTest(tree_depth);
-
-    cout << "\n" << endl;
-    std::cout << "\nAddressTest result => " << addressResult << std::endl;
-    std::cout << "\nCoinTest result => " << coinResult << std::endl;
-    std::cout << "\nMerkleTreeSimpleTest result => " << merkleSimpleResult << std::endl;
-    std::cout << "\nMintTxTest result => " << mintTxResult << std::endl;
-    std::cout << "\nPourTxTest result => " << pourTxResult << std::endl;
-    std::cout << "\nSimpleTxTest result => " << simpleTxResult << std::endl;
-    std::cout << "\nSaveAndLoadKeysFromFiles result => " << saveAndLoadKeysFromFiles << std::endl;
-
-    return !(merkleSimpleResult && addressResult &&
-        coinResult && mintTxResult && saveAndLoadKeysFromFiles
-        && pourTxResult && simpleTxResult);
+    BOOST_CHECK(minttx_res && pourtx_res);
 }
