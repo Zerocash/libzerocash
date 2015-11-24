@@ -491,11 +491,8 @@ BOOST_AUTO_TEST_CASE( MerkleTreeSimpleTest ) {
 	libzerocash::printVectorAsHex(root);
 	cout << endl;
 
-	vector<bool> testVec = convertIntToVector(1);
-	libzerocash::printVector(testVec);
-
-    merkle_authentication_path witness(3);
-	if (merkleTree.getWitness(convertIntToVector(1), witness) == false) {
+    merkle_authentication_path witness(16);
+	if (merkleTree.getWitness(convertIntToVector(3), witness) == false) {
 		BOOST_ERROR("Witness generation failed.");
 	}
 
@@ -507,13 +504,14 @@ BOOST_AUTO_TEST_CASE( MerkleTreeSimpleTest ) {
     }
     cout << "\n" << endl;
 
-	christinaTree.getWitness(coinValues.at(1), witness);
+    merkle_authentication_path christina_witness(16);
+	christinaTree.getWitness(coinValues.at(3), christina_witness);
 
     cout << "Christina created witness.\n" << endl;
 
-    cout << "Witness: " << endl;
-    for(size_t i = 0; i < witness.size(); i++) {
-        libzerocash::printVectorAsHex(witness.at(i));
+    cout << "Christina Witness: " << endl;
+    for(size_t i = 0; i < christina_witness.size(); i++) {
+        libzerocash::printVectorAsHex(christina_witness.at(i));
     }
     cout << "\n" << endl;
 
@@ -522,14 +520,38 @@ BOOST_AUTO_TEST_CASE( MerkleTreeSimpleTest ) {
     vector<bool> wit3(SHA256_BLOCK_SIZE * 8);
     vector<bool> inter_1(SHA256_BLOCK_SIZE * 8);
     vector<bool> inter_2(SHA256_BLOCK_SIZE * 8);
+    std::vector<bool> zeros(SHA256_BLOCK_SIZE * 8, 0);
 
     wit1 = coinValues.at(2);
     libzerocash::hashVectors(coinValues.at(0), coinValues.at(1), wit2);
-    libzerocash::hashVectors(coinValues.at(4), vector<bool>(SHA256_BLOCK_SIZE * 8, 0), inter_1);
-    libzerocash::hashVectors(vector<bool>(SHA256_BLOCK_SIZE * 8, 0), vector<bool>(SHA256_BLOCK_SIZE * 8, 0), inter_2);
+    libzerocash::hashVectors(coinValues.at(4), zeros, inter_1);
+    libzerocash::hashVectors(zeros, zeros, inter_2);
     libzerocash::hashVectors(inter_1, inter_2, wit3);
 
-    BOOST_CHECK((witness.at(0) == wit3) && (witness.at(1) == wit2) && (witness.at(2) == wit1));
+    BOOST_CHECK(christina_witness.size() == 16);
+    for (size_t i = 0; i < 13; i++) {
+        BOOST_CHECK(christina_witness.at(i) == zeros);
+    }
+    BOOST_CHECK(
+        (christina_witness.at(13) == wit3) &&
+        (christina_witness.at(14) == wit2) &&
+        (christina_witness.at(15) == wit1)
+    );
+
+    /* Uncomment this to make the test pass, and to prove to yourself that the
+     * two implementations are different in exactly this way. */
+    // inter_2 = zeros;
+    // libzerocash::hashVectors(inter_1, inter_2, wit3);
+
+    BOOST_CHECK(witness.size() == 64);
+    for (size_t i = 0; i < 61 /* 61 */; i++) {
+        BOOST_CHECK(witness.at(i) == zeros);
+    }
+    BOOST_CHECK(
+        (witness.at(61) == wit3) &&
+        (witness.at(62) == wit2) &&
+        (witness.at(63) == wit1)
+    );
 }
 
 BOOST_AUTO_TEST_CASE( SimpleTxTest ) {
