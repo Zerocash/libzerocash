@@ -400,6 +400,9 @@ void zerocash_pour_gadget<FieldT>::generate_r1cs_witness(const std::vector<merkl
         old_coin_commitments_in_tree[i]->generate_r1cs_witness();
     }
 
+    /* check that implicitly computed Merkle tree root matches one computed outside the gadget */
+    assert(merkle_tree_root_variable->bits.get_bits(this->pb) == merkle_tree_root);
+
     /* pack the input */
     unpack_inputs->generate_r1cs_witness_from_bits();
 
