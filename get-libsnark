@@ -12,9 +12,9 @@ LIBSNARK_SRC=${LIBSNARK_SRC:-https://github.com/scipr-lab/libsnark}
 
 CURVE=${CURVE:-ALT_BN128}
 
-LIBSNARK_FLAGS="$LIBSNARK_FLAGS NO_SUPERCOP=1 NO_GTEST=1 NO_DOCS=1 CURVE=$CURVE"
+LIBSNARK_FLAGS="$LIBSNARK_FLAGS -DWITH_SUPERCOP=OFF -DCURVE=$CURVE"
 if [[ `uname -s` == "Darwin" ]]; then
-    LIBSNARK_FLAGS="$LIBSNARK_FLAGS NO_PROCPS=1"
+    LIBSNARK_FLAGS="$LIBSNARK_FLAGS -DWITH_PROCPS=OFF"
 fi
 
 set -x
@@ -31,10 +31,12 @@ cd $DEPSRC
 [ ! -d libsnark ] && git clone $LIBSNARK_SRC libsnark
 cd libsnark
 git pull
-if [ "$CURVE" == "BN128" ]; then
-    # TODO: submit -fPIC patch to ate-pairing
-    INC_DIR=-fPIC ./prepare-depends.sh
-fi
+git checkout cmake
+git submodule init && git submodule update
+
+mkdir -p build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=$DEPINST $LIBSNARK_FLAGS ..
 make clean
-make lib $LIBSNARK_FLAGS
-make install PREFIX=$DEPINST $LIBSNARK_FLAGS
+make snark
+make install
