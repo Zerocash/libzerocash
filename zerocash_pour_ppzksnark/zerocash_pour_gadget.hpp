@@ -29,6 +29,7 @@
 
 namespace libzerocash {
 
+using namespace libff;
 using namespace libsnark;
 
 /**

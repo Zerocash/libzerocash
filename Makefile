@@ -1,5 +1,6 @@
 OPTFLAGS = -march=native -mtune=native -O2
-CXXFLAGS += -g -Wall -Wextra -Werror -Wfatal-errors -Wno-unused-parameter -std=c++11 -fPIC -Wno-unused-variable
+# TODO: re-enable -Werror -Wfatal-errors after libfqfft has fixed its sign comparison warnings
+CXXFLAGS += -g -Wall -Wextra -Wno-unused-parameter -std=c++11 -fPIC -Wno-unused-variable
 LDFLAGS += -flto
 
 ifeq ($(CURVE),)
@@ -13,9 +14,9 @@ DEPINST=depinst
 LIBZEROCASH=libzerocash
 UTILS=$(LIBZEROCASH)/utils
 TESTUTILS=tests
-LDLIBS += -L $(DEPINST)/lib -Wl,-rpath $(DEPINST)/lib -L . -lsnark -lgmpxx -lgmp
+LDLIBS += -L $(DEPINST)/lib -Wl,-rpath $(DEPINST)/lib -L . -lff -lsnark -lgmpxx -lgmp
 LDLIBS += -lboost_system -lcrypto -lcryptopp -lz -ldl
-CXXFLAGS += -I $(DEPINST)/include -I $(DEPINST)/include/libsnark -I . -DUSE_ASM -DCURVE_$(CURVE)
+CXXFLAGS += -I $(DEPINST)/include -I $(DEPINST)/include/libff -I $(DEPINST)/include/libfqfft -I $(DEPINST)/include/libsnark -I . -DUSE_ASM -DCURVE_$(CURVE)
 
 LIBPATH = /usr/local/lib
 

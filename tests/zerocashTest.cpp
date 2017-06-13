@@ -25,6 +25,7 @@
 #include "libzerocash/utils/util.h"
 
 using namespace std;
+using namespace libff;
 using namespace libsnark;
 
 vector<bool> convertIntToVector(uint64_t val) {

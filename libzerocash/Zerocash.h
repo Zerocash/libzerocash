@@ -59,10 +59,14 @@ public:
 	explicit ZerocashException(const std::string& str) : std::runtime_error(str) {}
 };
 
+namespace libff {
+};
+
 namespace libsnark {
 };
 
 namespace libzerocash {
+    using namespace libff;
     using namespace libsnark;
 };
 

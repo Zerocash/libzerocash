@@ -8,6 +8,12 @@
 
 set -e
 
+LIBFF_BRANCH=${LIBFF_BRANCH:-master}
+LIBFQFFT_BRANCH=${LIBFQFFT_BRANCH:-master}
+LIBSNARK_BRANCH=${LIBSNARK_BRANCH:-candidate-master}
+
+LIBFF_SRC=${LIBFF_SRC:-https://github.com/scipr-lab/libff}
+LIBFQFFT_SRC=${LIBFQFFT_SRC:-https://github.com/scipr-lab/libfqfft}
 LIBSNARK_SRC=${LIBSNARK_SRC:-https://github.com/scipr-lab/libsnark}
 
 CURVE=${CURVE:-ALT_BN128}
@@ -28,15 +34,40 @@ DEPINST=`pwd -P`/$DEPINST  # remember absolute path
 mkdir -p $DEPSRC
 cd $DEPSRC
 
-[ ! -d libsnark ] && git clone $LIBSNARK_SRC libsnark
-cd libsnark
-git pull
-git checkout cmake
-git submodule init && git submodule update
+[ ! -d gtest-build ] && mkdir gtest-build
+cd gtest-build
+cmake /usr/src/gtest/ -DCMAKE_INSTALL_PREFIX=$ROOT
+make -j
+mkdir  -p $DEPINST/lib
+cp libgtest* $DEPINST/lib
+cd ..
 
-mkdir -p build
+[ -d libff ] || git clone --recursive -b $LIBFF_BRANCH $LIBFF_SRC
+cd libff
+rm -rf build
+mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=$DEPINST $LIBSNARK_FLAGS ..
-make clean
-make snark
+cmake .. -DCMAKE_INSTALL_PREFIX=$DEPINST
+make -j
 make install
+cd ../../
+
+[ -d libfqfft ] || git clone --recursive -b $LIBFQFFT_BRANCH $LIBFQFFT_SRC
+cd libfqfft
+rm -rf build
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$DEPINST -DCMAKE_PREFIX_PATH=$DEPINST
+make -j
+make install
+cd ../../
+
+[ -d libsnark ] || git clone --recursive -b $LIBSNARK_BRANCH $LIBSNARK_SRC
+cd libsnark
+rm -rf build
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$DEPINST -DCMAKE_PREFIX_PATH=$DEPINST $LIBSNARK_FLAGS
+make -j
+make install
+cd ../../

@@ -4,10 +4,11 @@
  *             project and contributors (see AUTHORS).
  * @copyright  MIT license (see LICENSE file)
  *****************************************************************************/
+#include "libff/common/profiling.hpp"
 #include "libsnark/common/default_types/r1cs_ppzksnark_pp.hpp"
-#include "libsnark/common/profiling.hpp"
 #include "zerocash_pour_ppzksnark/zerocash_pour_gadget.hpp"
 
+using namespace libff;
 using namespace libsnark;
 
 int main(int argc, const char* argv[])

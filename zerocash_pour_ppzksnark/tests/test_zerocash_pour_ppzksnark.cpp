@@ -10,10 +10,10 @@
 #include <set>
 #include <vector>
 
-#include "libsnark/common/default_types/r1cs_ppzksnark_pp.hpp"
+#include "libff/common/profiling.hpp"
+#include "libff/common/utils.hpp"
 #include "libsnark/common/data_structures/merkle_tree.hpp"
-#include "libsnark/common/utils.hpp"
-#include "libsnark/common/profiling.hpp"
+#include "libsnark/common/default_types/r1cs_ppzksnark_pp.hpp"
 #include "libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp"
 #include "zerocash_pour_ppzksnark/zerocash_pour_gadget.hpp"
 #include "zerocash_pour_ppzksnark/zerocash_pour_ppzksnark.hpp"
